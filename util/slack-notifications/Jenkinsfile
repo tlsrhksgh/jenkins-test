@@ -1,22 +1,40 @@
-node {
-
-  // job
-  try {
-    stage('build') {
-      println('so far so good...')
+pipeline {
+    stages {
+        stage('checkout') {
+                steps {
+                    git branch: 'main',
+                    url: 'https://github.com/tlsrhksgh/recommend_food.git'
+                }
+            }
+        stage('build') {
+            steps {
+                sh './gradlew build'
+                slackSend (
+                    color: '#FF0000',
+                    message: "STARTED: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})"
+                )
+            }
+        }
+        stage('test') {
+            steps {
+                sh './gradlew test'
+            }
+        }
     }
-    stage('test') {
-      println('A test has failed!')
-      sh 'exit 1'
+    post {
+        success {
+            slackSend (
+                channel: '#test',
+                color: '#00FF00',
+                message: "SUCCESS: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})"
+            )
+        }
+        failure {
+            slackSend (
+                channel: '#test',
+                color: '#FF0000',
+                message: "FAILED: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})"
+            )
+        }
     }
-  } catch(e) {
-    // mark build as failed
-    currentBuild.result = "FAILURE";
-
-    // send slack notification
-    slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
-
-    // throw the error
-    throw e;
-  }
 }
