@@ -49,6 +49,7 @@ pipeline  {
           script {
               def slackMessage = "Build 실패! 😞"
               slackSend(channel: '#general', message: slackMessage)
+            }
         }
     }
 }
