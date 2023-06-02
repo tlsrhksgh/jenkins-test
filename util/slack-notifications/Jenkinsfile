@@ -3,7 +3,7 @@ pipeline  {
     stages {
         stage('checkout') {
                 steps {
-                    git branch: 'main',
+                    git branch: 'master',
                     url: 'https://github.com/tlsrhksgh/recommend_food.git'
                 }
             }
