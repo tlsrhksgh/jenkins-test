@@ -1,15 +1,15 @@
 pipeline  {
     agent any
-
     stages {
         stage('checkout') {
                 steps {
-                    git branch: 'master',
+                    git branch: 'main',
                     url: 'https://github.com/tlsrhksgh/recommend_food.git'
                 }
             }
         stage('build') {
             steps {
+                sh 'chmod 700 ./gradlew'
                 sh './gradlew build'
                 slackSend (
                     color: '#FF0000',
