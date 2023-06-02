@@ -1,6 +1,5 @@
-pipeline  {
+node  {
     try {
-        agent any
         stages {
             stage('checkout') {
                     steps {
