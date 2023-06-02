@@ -38,18 +38,17 @@ pipeline  {
 //                 message: "FAILED: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})"
 //             )
 //         }
-        always {
-            script {
-                def slackMessage = ""
+    success {
+          script {
+              def slackMessage = "Build 성공! 🎉"
+              slackSend(channel: '#general', message: slackMessage)
+          }
+      }
 
-                if (currentBuild.result == 'SUCCESS') {
-                    slackMessage = "Build 성공! 🎉"
-                } else {
-                    slackMessage = "Build 실패! 😞"
-                }
-
-                slackSend(channel: '#general', message: slackMessage)
-             }
-         }
+    failure {
+          script {
+              def slackMessage = "Build 실패! 😞"
+              slackSend(channel: '#general', message: slackMessage)
+        }
     }
 }
