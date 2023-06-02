@@ -1,42 +1,47 @@
 pipeline  {
-    agent any
-    stages {
-        stage('checkout') {
+    try {
+        agent any
+        stages {
+            stage('checkout') {
+                    steps {
+                        git branch: 'master',
+                        url: 'https://github.com/tlsrhksgh/recommend_food.git'
+                    }
+                }
+            stage('build') {
                 steps {
-                    git branch: 'master',
-                    url: 'https://github.com/tlsrhksgh/recommend_food.git'
+                    sh 'chmod 700 ./gradlew'
+                    sh './gradlew build'
+                    slackSend (
+                        color: '#FF0000',
+                        message: "STARTED: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})"
+                     )
                 }
             }
-        stage('build') {
-            steps {
-                sh 'chmod 700 ./gradlew'
-                sh './gradlew build'
+            stage('test') {
+                steps {
+                    sh './gradlew test'
+                }
+            }
+        }
+    } catch(e) {
+        post {
+            success {
                 slackSend (
+                    channel: '#test',
+                    color: '#00FF00',
+                    message: "SUCCESS: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})"
+                )
+            }
+            failure {
+                slackSend (
+                    channel: '#test',
                     color: '#FF0000',
-                    message: "STARTED: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})"
+                    message: "FAILED: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})"
                 )
             }
         }
-        stage('test') {
-            steps {
-                sh './gradlew test'
-            }
-        }
-    }
-    post {
-        success {
-            slackSend (
-                channel: '#test',
-                color: '#00FF00',
-                message: "SUCCESS: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})"
-            )
-        }
-        failure {
-            slackSend (
-                channel: '#test',
-                color: '#FF0000',
-                message: "FAILED: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL})"
-            )
-        }
+
+        throw e;
     }
 }
